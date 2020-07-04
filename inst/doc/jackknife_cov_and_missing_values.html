@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Martin Ueding" />
+
+
+<title>Jackknife Covariance and Missing Values</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Jackknife Covariance and Missing Values</h1>
+<h4 class="author">Martin Ueding</h4>
+
+
+
+<div id="missing-column" class="section level1">
+<h1>Missing column</h1>
+<p>We create some data and replace one column with <code>NA</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">120</span>), <span class="dt">ncol =</span> <span class="dv">10</span>)
+data[, <span class="dv">3</span>] &lt;-<span class="st"> </span><span class="ot">NA</span>
+<span class="kw">print</span>(data)</code></pre></div>
+<pre><code>##              [,1]       [,2] [,3]       [,4]        [,5]        [,6]
+##  [1,]  0.52725690 -0.5650635   NA -0.8330864 -1.84076675 -0.70387009
+##  [2,] -0.32897935 -0.8141488   NA  2.8772045  0.50445371  0.35653669
+##  [3,] -0.03722701 -1.4251536   NA -0.9783538  0.08552368 -0.63458325
+##  [4,]  0.86656273  0.1338692   NA  0.7363414 -1.46301556  1.29947467
+##  [5,] -0.27848127  0.9784333   NA -1.8402411  0.36585998  0.06301041
+##  [6,] -0.72859091 -2.0063301   NA -0.1671825  2.91277834  1.08138601
+##  [7,]  0.14320714 -2.1895088   NA  0.6708241  0.45407746  1.00644550
+##  [8,] -0.02699480  0.3412810   NA  0.5598077 -0.53392468  1.29904163
+##  [9,] -0.92760608  0.2585080   NA  0.6081378  0.91698313  0.20770775
+## [10,]  1.16113976  0.9334869   NA -0.3883073  0.24693741  1.93688179
+## [11,]  0.32968508 -0.5004544   NA  0.1780987 -0.90708610  0.16230491
+## [12,] -0.52280539 -1.3532271   NA -0.5578688  0.91938632 -0.60554273
+##              [,7]       [,8]       [,9]       [,10]
+##  [1,] -0.66505318  2.0955300 -0.7208257 -1.39526062
+##  [2,] -0.68950095  0.9864506 -0.5673924 -1.37842012
+##  [3,]  0.76582097  2.1555987  1.7947341  0.04310134
+##  [4,]  2.28198335 -0.9557152 -0.5284728 -0.53421657
+##  [5,] -1.37036796 -0.9473371  0.9176235  1.01011782
+##  [6,] -0.79153297 -0.3549076 -0.4968285 -0.42689409
+##  [7,] -0.84289415  2.1293334  0.4371836 -0.36992825
+##  [8,]  0.18424855 -1.4000551 -0.3569141 -0.10540388
+##  [9,] -0.05918566  1.1119620  1.3792888  0.96269766
+## [10,]  2.21864791 -1.0228976 -1.0114390 -0.52767763
+## [11,] -0.99578761 -2.0396835 -2.6784326  0.88223119
+## [12,] -1.34198710  0.6878626  0.4217538 -2.60461988</code></pre>
+<p>The covariance, with the implicit <code>use = 'everything'</code> will give us a “cross” of <code>NA</code> in the covariance matrix.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cov</span>(data)</code></pre></div>
+<pre><code>##              [,1]       [,2] [,3]        [,4]        [,5]       [,6]
+##  [1,]  0.39602529  0.2257976   NA -0.06122212 -0.53820619  0.2100530
+##  [2,]  0.22579757  1.1574737   NA -0.20122460 -0.52853820  0.2497122
+##  [3,]          NA         NA   NA          NA          NA         NA
+##  [4,] -0.06122212 -0.2012246   NA  1.40460774  0.03063429  0.3310987
+##  [5,] -0.53820619 -0.5285382   NA  0.03063429  1.56726935  0.1512848
+##  [6,]  0.21005302  0.2497122   NA  0.33109869  0.15128476  0.7530054
+##  [7,]  0.51649386  0.5455969   NA  0.13282563 -0.48553962  0.6073985
+##  [8,] -0.23184734 -0.8958199   NA  0.07973833  0.13344307 -0.6786274
+##  [9,] -0.37055100 -0.1355354   NA -0.36983937  0.47931412 -0.3403516
+## [10,] -0.05042305  0.4487861   NA -0.23752735 -0.01404820  0.1623234
+##              [,7]        [,8]        [,9]       [,10]
+##  [1,]  0.51649386 -0.23184734 -0.37055100 -0.05042305
+##  [2,]  0.54559691 -0.89581991 -0.13553538  0.44878607
+##  [3,]          NA          NA          NA          NA
+##  [4,]  0.13282563  0.07973833 -0.36983937 -0.23752735
+##  [5,] -0.48553962  0.13344307  0.47931412 -0.01404820
+##  [6,]  0.60739853 -0.67862744 -0.34035158  0.16232337
+##  [7,]  1.59426005 -0.36715377 -0.05793457  0.07672173
+##  [8,] -0.36715377  2.25995991  1.05910559 -0.56368506
+##  [9,] -0.05793457  1.05910559  1.44190733  0.09457831
+## [10,]  0.07672173 -0.56368506  0.09457831  1.14601966</code></pre>
+<p>The jackknife covariance does the same thing.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">jackknife_cov</span>(data)</code></pre></div>
+<pre><code>##             [,1]      [,2] [,3]       [,4]       [,5]      [,6]       [,7]
+##  [1,]  3.9932550  2.276792   NA -0.6173230 -5.4269124  2.118035  5.2079797
+##  [2,]  2.2767922 11.671193   NA -2.0290147 -5.3294268  2.517932  5.5014355
+##  [3,]         NA        NA   NA         NA         NA        NA         NA
+##  [4,] -0.6173230 -2.029015   NA 14.1631280  0.3088957  3.338579  1.3393251
+##  [5,] -5.4269124 -5.329427   NA  0.3088957 15.8032993  1.525455 -4.8958579
+##  [6,]  2.1180346  2.517932   NA  3.3385785  1.5254546  7.592805  6.1246019
+##  [7,]  5.2079797  5.501435   NA  1.3393251 -4.8958579  6.124602 16.0754555
+##  [8,] -2.3377940 -9.032851   NA  0.8040281  1.3455510 -6.842827 -3.7021338
+##  [9,] -3.7363893 -1.366648   NA -3.7292136  4.8330840 -3.431878 -0.5841735
+## [10,] -0.5084325  4.525260   NA -2.3950674 -0.1416527  1.636761  0.7736108
+##             [,8]       [,9]      [,10]
+##  [1,] -2.3377940 -3.7363893 -0.5084325
+##  [2,] -9.0328507 -1.3666484  4.5252595
+##  [3,]         NA         NA         NA
+##  [4,]  0.8040281 -3.7292136 -2.3950674
+##  [5,]  1.3455510  4.8330840 -0.1416527
+##  [6,] -6.8428267 -3.4318785  1.6367607
+##  [7,] -3.7021338 -0.5841735  0.7736108
+##  [8,] 22.7879291 10.6793147 -5.6838244
+##  [9,] 10.6793147 14.5392322  0.9536647
+## [10,] -5.6838244  0.9536647 11.5556982</code></pre>
+</div>
+<div id="missing-row" class="section level1">
+<h1>Missing row</h1>
+<p>When we have some <code>NA</code> values in a row, we have a conceptual problem with the jackknife as the width of the jackknife distribution is linked to the number of measurements.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">120</span>), <span class="dt">ncol =</span> <span class="dv">10</span>)
+data[<span class="dv">2</span>, ] &lt;-<span class="st"> </span><span class="ot">NA</span>
+<span class="kw">print</span>(data)</code></pre></div>
+<pre><code>##             [,1]       [,2]       [,3]       [,4]        [,5]       [,6]
+##  [1,]  0.2319684 -1.0417411  0.7841038 -1.4569667 -0.51423719 -0.4738826
+##  [2,]         NA         NA         NA         NA          NA         NA
+##  [3,]  1.5753159  0.7606100  0.2877911 -1.5020441 -0.06586191  1.6701913
+##  [4,] -0.9682803 -0.7941394  0.2280203  1.7791729 -0.55453876  1.1581078
+##  [5,] -0.5653530  0.5563140 -0.1897482 -0.2250793  0.36231650  0.4517224
+##  [6,] -0.8466961 -1.8471158  0.1835276  2.0840631 -0.55140704  0.8695333
+##  [7,] -2.1527329 -0.2399547  1.6030800  1.7218317 -0.43925685 -0.2125655
+##  [8,]  0.2142895  1.3195920 -1.0153580  1.3608098  0.14743768 -0.3355199
+##  [9,] -2.3461886  2.0155852  0.1644110  0.4275195  0.99522225  0.6089167
+## [10,] -0.5712919 -0.5154676  0.1823142  0.3993543 -2.03591803  0.7316732
+## [11,]  0.1782927 -0.9164950  0.1212507  0.4301902 -0.17158141 -1.3095372
+## [12,]  0.3616790  2.6653700 -0.2467147 -0.7238332  0.17495490  1.7830029
+##             [,7]        [,8]       [,9]       [,10]
+##  [1,] -1.6976902  0.09728423  0.9038715 -0.68359889
+##  [2,]         NA          NA         NA          NA
+##  [3,]  1.7016404  0.57188894  1.3800839 -0.96380028
+##  [4,] -1.9856220  0.30292925 -0.2245294 -0.74710414
+##  [5,]  1.0290240 -0.53308489 -2.0868422  0.55156460
+##  [6,] -1.0102936 -2.86162295  0.5879080  0.07937102
+##  [7,]  1.7484263  1.76558417  1.1075010 -1.87207295
+##  [8,] -1.9183902 -0.41129021  1.4201490  0.47395157
+##  [9,] -0.1378898 -1.14469597 -0.3479164  0.30071595
+## [10,]  1.1611336 -1.68471148 -0.5275343  0.51733299
+## [11,]  0.7758523 -0.36545530  1.0559696  1.15103955
+## [12,] -0.5175131  0.92250274 -0.5816746 -1.04687059</code></pre>
+<p>Also here we get the same behavior by default:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cov</span>(data)</code></pre></div>
+<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+##  [1,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [2,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [3,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [4,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [5,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [6,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [7,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [8,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [9,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+## [10,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">jackknife_cov</span>(data)</code></pre></div>
+<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+##  [1,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [2,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [3,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [4,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [5,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [6,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [7,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [8,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [9,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+## [10,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA</code></pre>
+<p>When we use <code>complete</code>, we get the same thing as just dropping the <code>NA</code> rows.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cov</span>(data, <span class="dt">use =</span> <span class="st">'complete'</span>)</code></pre></div>
+<pre><code>##              [,1]       [,2]        [,3]        [,4]         [,5]         [,6]
+##  [1,]  1.30103326  0.1012675 -0.29252024 -0.89866029 -0.076512587  0.155496110
+##  [2,]  0.10126753  1.9736935 -0.38545492 -0.60637630  0.659830950  0.501881191
+##  [3,] -0.29252024 -0.3854549  0.41540469  0.01875502 -0.133684585 -0.086282734
+##  [4,] -0.89866029 -0.6063763  0.01875502  1.61290704 -0.147707213 -0.210080850
+##  [5,] -0.07651259  0.6598309 -0.13368458 -0.14770721  0.578198468  0.006436648
+##  [6,]  0.15549611  0.5018812 -0.08628273 -0.21008085  0.006436648  0.905334387
+##  [7,] -0.04589359  0.1312257  0.36493410 -0.41069069 -0.118906980  0.041467917
+##  [8,]  0.18973429  0.6066817  0.30052077 -0.45079884  0.200204968 -0.001201813
+##  [9,]  0.34931254 -0.3779087  0.14965746  0.12118299 -0.069572557 -0.375162256
+## [10,]  0.06293107 -0.1298983 -0.35864639  0.10397578  0.020286857 -0.340013673
+##              [,7]         [,8]        [,9]       [,10]
+##  [1,] -0.04589359  0.189734288  0.34931254  0.06293107
+##  [2,]  0.13122573  0.606681709 -0.37790870 -0.12989828
+##  [3,]  0.36493410  0.300520774  0.14965746 -0.35864639
+##  [4,] -0.41069069 -0.450798836  0.12118299  0.10397578
+##  [5,] -0.11890698  0.200204968 -0.06957256  0.02028686
+##  [6,]  0.04146792 -0.001201813 -0.37516226 -0.34001367
+##  [7,]  2.07083507  0.360719472 -0.15059524 -0.08703427
+##  [8,]  0.36071947  1.630639705  0.27910828 -0.81477057
+##  [9,] -0.15059524  0.279108280  1.19123578 -0.22909654
+## [10,] -0.08703427 -0.814770573 -0.22909654  0.83171570</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">all</span>(<span class="kw">cov</span>(data, <span class="dt">use =</span> <span class="st">'complete'</span>) <span class="op">==</span><span class="st"> </span><span class="kw">cov</span>(data[<span class="kw">complete.cases</span>(data), ]))</code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>With our jackknife function we get a failure, which should not happen!</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">jackknife_cov</span>(data, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>##              [,1]      [,2]       [,3]        [,4]        [,5]        [,6]
+##  [1,]  157.425025  12.25337 -35.394949 -108.737895  -9.2580230  18.8150293
+##  [2,]   12.253371 238.81691 -46.640046  -73.371532  79.8395449  60.7276241
+##  [3,]  -35.394949 -46.64005  50.263967    2.269357 -16.1758347 -10.4402108
+##  [4,] -108.737895 -73.37153   2.269357  195.161752 -17.8725728 -25.4197828
+##  [5,]   -9.258023  79.83954 -16.175835  -17.872573  69.9620147   0.7788344
+##  [6,]   18.815029  60.72762 -10.440211  -25.419783   0.7788344 109.5454609
+##  [7,]   -5.553124  15.87831  44.157026  -49.693574 -14.3877445   5.0176179
+##  [8,]   22.957849  73.40849  36.363014  -54.546659  24.2248011  -0.1454194
+##  [9,]   42.266818 -45.72695  18.108553   14.663142  -8.4182795 -45.3946330
+## [10,]    7.614660 -15.71769 -43.396213   12.581070   2.4547097 -41.1416545
+##             [,7]        [,8]       [,9]     [,10]
+##  [1,]  -5.553124  22.9578489  42.266818   7.61466
+##  [2,]  15.878313  73.4084868 -45.726953 -15.71769
+##  [3,]  44.157026  36.3630136  18.108553 -43.39621
+##  [4,] -49.693574 -54.5466591  14.663142  12.58107
+##  [5,] -14.387745  24.2248011  -8.418279   2.45471
+##  [6,]   5.017618  -0.1454194 -45.394633 -41.14165
+##  [7,] 250.571044  43.6470561 -18.222024 -10.53115
+##  [8,]  43.647056 197.3074044  33.772102 -98.58724
+##  [9,] -18.222024  33.7721019 144.139530 -27.72068
+## [10,] -10.531146 -98.5872394 -27.720682 100.63760</code></pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
