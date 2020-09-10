@@ -138,6 +138,7 @@ Other NLS fit functions:
 \code{\link{parametric.nlsfit.cov}()},
 \code{\link{parametric.nlsfit}()},
 \code{\link{plot.bootstrapfit}()},
+\code{\link{predict.bootstrapfit}()},
 \code{\link{print.bootstrapfit}()},
 \code{\link{summary.bootstrapfit}()}
 }

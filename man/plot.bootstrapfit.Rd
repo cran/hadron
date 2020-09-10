@@ -6,13 +6,12 @@
 \usage{
 \method{plot}{bootstrapfit}(x, ..., col.line = "black", col.band = "gray",
   opacity.band = 0.65, lty = c(1), lwd = c(1), supports = 1000,
-  plot.range, error = x$error.function)
+  plot.range, error = x$error.function, ribbon.on.top = TRUE)
 }
 \arguments{
 \item{x}{object returned by \code{bootstrap.nlsfit}}
 
-\item{...}{Additional parameters passed to the \code{plotwitherror}
-function.}
+\item{...}{Additional parameters passed to the \code{plotwitherror} function.}
 
 \item{col.line}{line colour.}
 
@@ -30,9 +29,13 @@ function.}
 range in which fitline and errorband are plotted. Default is the range of
 the data.}
 
-\item{error}{Function to compute the standard error in resampling
-schemes. Default is \link{sd} for bootstrap. For other resampling
-schemes this might need to be changed.}
+\item{error}{Function to compute the standard error in resampling schemes.
+Default is \link{sd} for bootstrap. For other resampling schemes this might
+need to be changed.}
+
+\item{ribbon.on.top}{Logical, controls whether the ribbon should be in
+front of the data points. This is recommended when there are very many data
+points and a highly constrained model.}
 }
 \value{
 No return value.
@@ -47,6 +50,7 @@ Other NLS fit functions:
 \code{\link{parametric.bootstrap}()},
 \code{\link{parametric.nlsfit.cov}()},
 \code{\link{parametric.nlsfit}()},
+\code{\link{predict.bootstrapfit}()},
 \code{\link{print.bootstrapfit}()},
 \code{\link{simple.nlsfit}()},
 \code{\link{summary.bootstrapfit}()}

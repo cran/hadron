@@ -157,7 +157,9 @@ head(bsamples)
 
 fit.result <- bootstrap.nlsfit(fn, c(1, 1), value, x, bsamples)
 summary(fit.result)
-plot(fit.result)
+plot(fit.result, main = 'Ribbon on top')
+plot(fit.result, ribbon.on.top = FALSE, main = 'Ribbon below')
+residual_plot(fit.result, main = 'Residual Plot')
 
 }
 \seealso{
@@ -167,6 +169,7 @@ Other NLS fit functions:
 \code{\link{parametric.nlsfit.cov}()},
 \code{\link{parametric.nlsfit}()},
 \code{\link{plot.bootstrapfit}()},
+\code{\link{predict.bootstrapfit}()},
 \code{\link{print.bootstrapfit}()},
 \code{\link{simple.nlsfit}()},
 \code{\link{summary.bootstrapfit}()}
