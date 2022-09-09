@@ -429,7 +429,7 @@ set.wrapper <- function (fn, gr, dfn, par.guess, errormodel, useCov, W, x, ipx, 
 #' NLS fit with without bootstrap
 #'
 #' @inheritParams bootstrap.nlsfit
-#' @param errormodel Either "yerror" or "xyerror", depending on the x-values having
+#' @param errormodel Either "yerrors" or "xyerrors", depending on the x-values having
 #' errors or not.
 #' @param boot.R If larger than 0, \code{boot.R} paramtetric bootstrap samples are
 #' generated on the fit results after fit and error calculation are finished.
@@ -1222,6 +1222,8 @@ print.bootstrapfit <- function(x, ..., digits = 2) {
 #' @param ribbon.on.top Logical, controls whether the ribbon should be in
 #'   front of the data points. This is recommended when there are very many data
 #'   points and a highly constrained model.
+#' @param rep If set to \code{TRUE}, operate like "replot" in gnuplot. Allows
+#' plotting the fit result on top of existing plot.
 #'
 #' @importFrom stats predict
 #' 
@@ -1229,7 +1231,7 @@ print.bootstrapfit <- function(x, ..., digits = 2) {
 #'
 #' @export
 #' @family NLS fit functions
-plot.bootstrapfit <- function(x, ..., col.line="black", col.band="gray", opacity.band=0.65, lty=c(1), lwd=c(1), supports=1000, plot.range, error=x$error.function, ribbon.on.top = TRUE) {
+plot.bootstrapfit <- function(x, ..., col.line="black", col.band="gray", opacity.band=0.65, lty=c(1), lwd=c(1), supports=1000, plot.range, error=x$error.function, ribbon.on.top = TRUE, rep=FALSE) {
   # The plot object might not have a mask, we want to have one in either case.
   if (is.null(x$mask)) {
     x$mask <- rep(TRUE, length(x$x))
@@ -1253,7 +1255,7 @@ plot.bootstrapfit <- function(x, ..., col.line="black", col.band="gray", opacity
   }
   
   # We plot all the data first to get the xlim and ylim right.
-  limits <- plot_data(rep = FALSE)
+  limits <- plot_data(rep = rep)
   
   # Plot the ribbon.
   if(!is.null(prediction$err)) {

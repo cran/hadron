@@ -16,14 +16,15 @@ where N is the number of observations. N will be averaged over.}
 \item{Thalf}{Half of the time extent of the lattice}
 
 \item{type}{The function to be used to compute the effective mass values.
-Possibilities are "acosh", "solve", "log", "temporal", "shifted" and
-"weighted". While the first three assume normal cosh behaviour of the
-correlation function, "temporal" is desigend to remove an additional
+Possibilities are "acosh", "solve", "log", "temporal", "shifted",
+"weighted" and "power". While the first three assume normal cosh behaviour of the
+correlation function, "temporal" is designed to remove an additional
 constant stemming from temporal states in two particle correlation
 functions. The same for "subtracted" and "weighted", the latter for the case
 of two particle energies with the two particle having different energies. In
-the latter case only the leading polution is removed by
-\code{removeTemporal.cf} and taken into account here.}
+the latter case only the leading pollution is removed by
+\code{removeTemporal.cf} and taken into account here.
+"power" assumes a powerlaw decay instead of an exponential.}
 
 \item{nrObs}{The number of "observables" included in the correlator}
 

@@ -2,32 +2,7 @@
 % Please edit documentation in R/cvc_readutils.R
 \name{cf_key_meson_3pt}
 \alias{cf_key_meson_3pt}
-\title{Generate HDF5 key for CVC 'correlators' meson 3pt function with a local or derivative insertion
-
-The key for a meson three-point function has the form:
-
-/sud+-g-u-g/t10/dt12/gf5/pfx0pfy0pfz0/gc0/Ddim0_dir0/Ddim1_dir1/D\link{...}/gi5/pix0piy0piz0
-
-where, from left to right:
-\itemize{
-\item 'u' is the flavour of the "backward" propagator
-\item 'd' is the flavour of the "sequential" propagator
-\item '+' indicates that 'sud' is daggered
-\item 'g' indicates a gamma insertion
-\item 'u' is the flavour of the foward propagator
-\item 'g' indicates a Dirac structure at the source
-\item 'tXX' is the source time slice
-\item 'dtYY' is the source-sink separation
-\item 'gfN' gamma structure at the sink in CVC indexing
-\item 'pfxXpfyYpfzZ' is the sink momentum in CVC convention (sink and source phases are both e^{ipx})
-\item 'gcN' gamma structure at the current insertion point in CVC indexing
-\item 'DdimJ_dirK' covariant displacement applied in dimension 'J', direction 'K'
-where it should be noted that this is. in operator notation, i.e., the right-most
-displacement is the one applied first.
-\item \link{...}
-\item 'giN' gamma structure at the souce in CVC indexing
-\item 'pixXpiyYpizZ' at the source in CVC convention
-}}
+\title{Generate HDF5 key for CVC 'correlators' meson 3pt function with a local or derivative insertion}
 \usage{
 cf_key_meson_3pt(fwd_flav, bwd_flav, seq_flav, dt, snk_gamma, cur_gamma,
   cur_displ_dim = NA, cur_displ_dir = NA, src_gamma, src_p, snk_p)
@@ -70,8 +45,6 @@ vector in lattice units.}
 A character vector with the HDF5 key.
 }
 \description{
-Generate HDF5 key for CVC 'correlators' meson 3pt function with a local or derivative insertion
-
 The key for a meson three-point function has the form:
 
 /sud+-g-u-g/t10/dt12/gf5/pfx0pfy0pfz0/gc0/Ddim0_dir0/Ddim1_dir1/D\link{...}/gi5/pix0piy0piz0

@@ -4,7 +4,8 @@
 \alias{tex.catwitherror}
 \title{paste a number with error in tex-ready format}
 \usage{
-tex.catwitherror(x, dx, digits = 1, with.dollar = TRUE, with.cdot = TRUE, ...)
+tex.catwitherror(x, dx, digits = 1, with.dollar = TRUE, with.cdot = TRUE,
+  ...)
 }
 \arguments{
 \item{x}{either a single numeric value, or a numeric vector, where the first

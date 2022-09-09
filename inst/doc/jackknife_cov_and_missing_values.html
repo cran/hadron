@@ -1,436 +1,529 @@
 <!DOCTYPE html>
+
 <html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>Missing column</title>
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<script type="text/javascript">
-window.onload = function() {
-  var imgs = document.getElementsByTagName('img'), i, img;
-  for (i = 0; i < imgs.length; i++) {
-    img = imgs[i];
-    // center an image if it is the only element of its parent
-    if (img.parentElement.childElementCount === 1)
-      img.parentElement.style.textAlign = 'center';
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Martin Ueding" />
+
+
+<title>Jackknife Covariance and Missing Values</title>
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
   }
-};
-</script>
-
-<!-- Styles for R syntax highlighter -->
-<style type="text/css">
-   pre .operator,
-   pre .paren {
-     color: rgb(104, 118, 135)
-   }
-
-   pre .literal {
-     color: #990073
-   }
-
-   pre .number {
-     color: #099;
-   }
-
-   pre .comment {
-     color: #998;
-     font-style: italic
-   }
-
-   pre .keyword {
-     color: #900;
-     font-weight: bold
-   }
-
-   pre .identifier {
-     color: rgb(0, 0, 0);
-   }
-
-   pre .string {
-     color: #d14;
-   }
+  .sourceCode {
+    overflow: visible;
+  }
 </style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 
-<!-- R syntax highlighter -->
-<script type="text/javascript">
-var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
-hljs.initHighlightingOnLoad();
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
 </script>
 
 
 
-<style type="text/css">
-body, td {
-   font-family: sans-serif;
-   background-color: white;
-   font-size: 13px;
-}
 
-body {
-  max-width: 800px;
-  margin: auto;
-  padding: 1em;
-  line-height: 20px;
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
 }
-
-tt, code, pre {
-   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
 }
-
-h1 {
-   font-size:2.2em;
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
 }
-
-h2 {
-   font-size:1.8em;
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
 }
-
-h3 {
-   font-size:1.4em;
+#TOC ul ul {
+margin-left: -2em;
 }
-
-h4 {
-   font-size:1.0em;
+#TOC li {
+line-height: 16px;
 }
-
-h5 {
-   font-size:0.9em;
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
 }
-
-h6 {
-   font-size:0.8em;
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
 }
-
-a:visited {
-   color: rgb(50%, 0%, 50%);
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
 }
-
-pre, img {
-  max-width: 100%;
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
 }
 pre {
-  overflow-x: auto;
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
 }
-pre code {
-   display: block; padding: 0.5em;
+pre:not([class]) {
+background-color: #f7f7f7;
 }
-
 code {
-  font-size: 92%;
-  border: 1px solid #ccc;
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
 }
-
-code[class] {
-  background-color: #F8F8F8;
+p > code, li > code {
+padding: 2px 0px;
 }
-
-table, td, th {
-  border: none;
+div.figure {
+text-align: center;
 }
-
-blockquote {
-   color:#666666;
-   margin:0;
-   padding-left: 1em;
-   border-left: 0.5em #EEE solid;
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
 }
-
-hr {
-   height: 0px;
-   border-bottom: none;
-   border-top-width: thin;
-   border-top-style: dotted;
-   border-top-color: #999999;
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
 }
-
-@media print {
-   * {
-      background: transparent !important;
-      color: black !important;
-      filter:none !important;
-      -ms-filter: none !important;
-   }
-
-   body {
-      font-size:12pt;
-      max-width:100%;
-   }
-
-   a, a:visited {
-      text-decoration: underline;
-   }
-
-   hr {
-      visibility: hidden;
-      page-break-before: always;
-   }
-
-   pre, blockquote {
-      padding-right: 1em;
-      page-break-inside: avoid;
-   }
-
-   tr, img {
-      page-break-inside: avoid;
-   }
-
-   img {
-      max-width: 100% !important;
-   }
-
-   @page :left {
-      margin: 15mm 20mm 15mm 10mm;
-   }
-
-   @page :right {
-      margin: 15mm 10mm 15mm 20mm;
-   }
-
-   p, h2, h3 {
-      orphans: 3; widows: 3;
-   }
-
-   h2, h3 {
-      page-break-after: avoid;
-   }
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
 }
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
+
 
 
 
 </head>
 
 <body>
+
+
+
+
+<h1 class="title toc-ignore">Jackknife Covariance and Missing Values</h1>
+<h4 class="author">Martin Ueding</h4>
+
+
+
+<div id="missing-column" class="section level1">
 <h1>Missing column</h1>
-
 <p>We create some data and replace one column with <code>NA</code>.</p>
-
-<pre><code class="r">data &lt;- matrix(rnorm(120), ncol = 10)
-data[, 3] &lt;- NA
-print(data)
-</code></pre>
-
-<pre><code>##              [,1]        [,2] [,3]       [,4]       [,5]        [,6]       [,7]
-##  [1,] -1.27904056  0.07041690   NA -0.6860051  2.5689575  0.01661376  0.2660269
-##  [2,]  0.01582929  0.10838551   NA  0.1983723  0.3317581  0.23909421  0.5211834
-##  [3,]  0.17377845 -0.18116283   NA  1.4516706  0.8478808  0.06836127  0.3524147
-##  [4,]  0.39588479 -1.27501737   NA -1.0191441 -1.7632159  1.85809392 -1.4437067
-##  [5,] -0.43867090  0.05833588   NA  1.1633967 -0.8750039 -0.25678572  1.1270084
-##  [6,]  1.38585178 -0.08704935   NA  0.2305356 -0.2538861 -0.70162460  0.6592947
-##  [7,] -1.98244052 -0.08099831   NA -0.1788013 -0.4358925  0.97635899 -0.4190691
-##  [8,] -0.77275961  0.68237415   NA  0.8616933  1.4830114  0.65399842 -0.1069551
-##  [9,]  0.02140573 -2.05046615   NA  1.1876451 -0.4541026  1.68484609  0.7483050
-## [10,] -0.67486965 -0.51053473   NA  0.2604653  2.2114452 -1.20954650  0.6502747
-## [11,]  1.10818990 -0.38955767   NA  1.7030965  0.3027627  0.65007537 -0.1837478
-## [12,]  0.64832275 -0.70074403   NA  0.1546892  0.3395298  0.36944301 -0.4303423
-##              [,8]       [,9]      [,10]
-##  [1,]  0.73444965  0.2391790 -1.2267461
-##  [2,]  0.41432078  0.6372093  0.3698468
-##  [3,] -1.54205027  1.3260340  0.1087109
-##  [4,] -0.09674137  0.5994490  0.4092155
-##  [5,] -0.74621737  0.5610081  0.6499265
-##  [6,] -0.34306352  0.7358511 -1.0762464
-##  [7,] -2.01981490  0.8143593  0.6143677
-##  [8,] -1.73645315 -0.0437167 -0.1038178
-##  [9,]  0.39093559 -1.0372843  1.2474161
-## [10,] -0.44341900 -1.2213759 -0.6960890
-## [11,] -2.37455002 -2.7202644 -1.4806522
-## [12,]  0.66754807 -0.3176129 -0.5420826
-</code></pre>
-
-<p>The covariance, with the implicit <code>use = &#39;everything&#39;</code> will give us a “cross” of <code>NA</code> in the covariance matrix.</p>
-
-<pre><code class="r">cov(data)
-</code></pre>
-
-<pre><code>##              [,1]        [,2] [,3]        [,4]        [,5]        [,6]
-##  [1,]  0.94588099 -0.20278009   NA  0.24411612 -0.41146606 -0.02286725
-##  [2,] -0.20278009  0.51681678   NA  0.02307173  0.39436669 -0.33743470
-##  [3,]          NA          NA   NA          NA          NA          NA
-##  [4,]  0.24411612  0.02307173   NA  0.71587279  0.02772605 -0.08276874
-##  [5,] -0.41146606  0.39436669   NA  0.02772605  1.59248532 -0.62057830
-##  [6,] -0.02286725 -0.33743470   NA -0.08276874 -0.62057830  0.79441203
-##  [7,] -0.01928866  0.08728117   NA  0.29595639  0.25849987 -0.38141327
-##  [8,]  0.11280894 -0.29355774   NA -0.46236664  0.07513895 -0.03454355
-##  [9,] -0.28211277  0.25744764   NA -0.37518239 -0.29204861 -0.04857147
-## [10,] -0.25959318 -0.22264501   NA  0.03867026 -0.59040715  0.39658572
-##               [,7]        [,8]         [,9]       [,10]
-##  [1,] -0.019288657  0.11280894 -0.282112770 -0.25959318
-##  [2,]  0.087281166 -0.29355774  0.257447645 -0.22264501
-##  [3,]           NA          NA           NA          NA
-##  [4,]  0.295956389 -0.46236664 -0.375182390  0.03867026
-##  [5,]  0.258499868  0.07513895 -0.292048606 -0.59040715
-##  [6,] -0.381413267 -0.03454355 -0.048571469  0.39658572
-##  [7,]  0.490185384  0.10499681 -0.008502191  0.02972928
-##  [8,]  0.104996809  1.19148959  0.202521809  0.07257879
-##  [9,] -0.008502191  0.20252181  1.286861377  0.37308917
-## [10,]  0.029729278  0.07257879  0.373089172  0.73348871
-</code></pre>
-
-<p>The jackknife covariance does the same thing.</p>
-
-<pre><code class="r">jackknife_cov(data)
-</code></pre>
-
-<pre><code>##             [,1]       [,2] [,3]       [,4]       [,5]       [,6]        [,7]
-##  [1,]  9.5376333 -2.0446993   NA  2.4615042 -4.1489494 -0.2305781 -0.19449396
-##  [2,] -2.0446993  5.2112358   NA  0.2326399  3.9765308 -3.4024666  0.88008509
-##  [3,]         NA         NA   NA         NA         NA         NA          NA
-##  [4,]  2.4615042  0.2326399   NA  7.2183840  0.2795711 -0.8345848  2.98422692
-##  [5,] -4.1489494  3.9765308   NA  0.2795711 16.0575603 -6.2574979  2.60654033
-##  [6,] -0.2305781 -3.4024666   NA -0.8345848 -6.2574979  8.0103213 -3.84591711
-##  [7,] -0.1944940  0.8800851   NA  2.9842269  2.6065403 -3.8459171  4.94270262
-##  [8,]  1.1374902 -2.9600405   NA -4.6621969  0.7576511 -0.3483141  1.05871783
-##  [9,] -2.8446371  2.5959304   NA -3.7830891 -2.9448234 -0.4897623 -0.08573042
-## [10,] -2.6175646 -2.2450038   NA  0.3899252 -5.9532721  3.9989061  0.29977022
-##             [,8]        [,9]      [,10]
-##  [1,]  1.1374902 -2.84463710 -2.6175646
-##  [2,] -2.9600405  2.59593042 -2.2450038
-##  [3,]         NA          NA         NA
-##  [4,] -4.6621969 -3.78308910  0.3899252
-##  [5,]  0.7576511 -2.94482345 -5.9532721
-##  [6,] -0.3483141 -0.48976231  3.9989061
-##  [7,]  1.0587178 -0.08573042  0.2997702
-##  [8,] 12.0141867  2.04209491  0.7318362
-##  [9,]  2.0420949 12.97585222  3.7619825
-## [10,]  0.7318362  3.76198248  7.3960112
-</code></pre>
-
-<h1>Missing row</h1>
-
-<p>When we have some <code>NA</code> values in a row, we have a conceptual problem with the jackknife as the width of the jackknife distribution is linked to the number of measurements.</p>
-
-<pre><code class="r">data &lt;- matrix(rnorm(120), ncol = 10)
-data[2, ] &lt;- NA
-print(data)
-</code></pre>
-
-<pre><code>##              [,1]       [,2]        [,3]       [,4]        [,5]        [,6]
-##  [1,]  0.09235770 -0.2736822  1.07768454  1.3986476 -0.04427985 -0.43386960
-##  [2,]          NA         NA          NA         NA          NA          NA
-##  [3,] -0.81576487  0.7775704  0.17109196 -1.4391706 -0.44610521 -0.03114897
-##  [4,]  2.29712384 -0.9708294 -1.82820072  1.2548585 -0.29008661 -0.04011966
-##  [5,]  0.39095616  0.5544508 -2.14947293 -0.1399317  0.27295889  1.55526028
-##  [6,]  0.77340232 -0.5477555 -0.17083258  0.7541595 -0.20869824  0.24868524
-##  [7,]  0.08800119 -0.6336545 -0.98499901  0.8890336  1.53409005 -1.50295644
-##  [8,] -0.96631559  1.1562604  0.61086918 -0.6392279 -1.63786811 -1.36196747
-##  [9,] -0.33965840  0.1433969 -0.02903113 -0.6113492  0.11225663 -0.20504150
-## [10,] -1.30450909  1.7679298 -0.15480305 -0.3012219 -0.35047327 -1.58522455
-## [11,]  0.93987339  1.7115772  0.15712533 -0.5699128 -0.30008218 -0.09824490
-## [12,]  1.17786851 -0.8153058  0.52999370  1.6446007 -0.65509473  1.54280077
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">data &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">120</span>), <span class="dt">ncol =</span> <span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb1-2" title="2">data[, <span class="dv">3</span>] &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="kw">print</span>(data)</a></code></pre></div>
+<pre><code>##             [,1]         [,2] [,3]       [,4]        [,5]       [,6]
+##  [1,]  0.8079227  0.953249395   NA  1.1274464  0.09712716 -0.4742720
+##  [2,]  0.9832281 -1.260280844   NA -0.1783912 -1.03575574 -0.3311356
+##  [3,]  0.7170138  0.262284696   NA -0.8507424 -0.07323595  1.2373899
+##  [4,] -1.0496321  0.001392252   NA  1.4477400  0.33728515  0.1810778
+##  [5,]  1.0878961  0.878943747   NA -0.2420444  0.89014789 -0.5636744
+##  [6,]  1.1928337 -2.258967269   NA -1.1358111 -2.01461250 -0.1612763
+##  [7,] -0.6118118  0.593095212   NA -0.1851273 -0.22177968 -0.8654250
+##  [8,]  0.8141878 -1.513587594   NA -0.8900747  0.56687196 -1.0843648
+##  [9,] -1.4052400  0.233289389   NA -1.2110320  1.26545184  0.7710383
+## [10,] -1.0421440 -0.418332662   NA  0.4143678  1.01131831  1.6529310
+## [11,] -0.7593017  0.115098120   NA  1.6526934 -0.42903052  0.8128500
+## [12,]  0.8663020  0.570655355   NA  0.9834333 -0.94808047  1.4868666
 ##              [,7]       [,8]       [,9]      [,10]
-##  [1,] -1.44594714  1.8779742 -1.5210546  1.3315831
-##  [2,]          NA         NA         NA         NA
-##  [3,]  2.18019040  0.5985201 -1.3091372 -0.1942886
-##  [4,]  0.46982988  1.4966075 -0.3836306 -1.5564391
-##  [5,]  2.44998447 -0.5811074  0.4178415 -1.0270927
-##  [6,] -1.29552794 -0.7256546 -1.1649551 -1.0798785
-##  [7,]  0.27222324 -0.5419584 -0.5780117  2.4435094
-##  [8,]  1.00917973 -1.2529065  0.4527346  0.2751830
-##  [9,]  0.91578302 -0.8642721 -2.1689747 -0.3336574
-## [10,]  0.41343601 -0.5788200 -1.7820646  1.4319158
-## [11,]  0.04372569  1.2240819 -1.8080071 -1.3366318
-## [12,]  2.89349134  1.0544009  0.8544051 -1.0875780
-</code></pre>
-
-<p>Also here we get the same behavior by default:</p>
-
-<pre><code class="r">cov(data)
-</code></pre>
-
-<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [2,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [3,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [4,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [5,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [6,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [7,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [8,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [9,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-## [10,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-</code></pre>
-
-<pre><code class="r">jackknife_cov(data)
-</code></pre>
-
-<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [2,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [3,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [4,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [5,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [6,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [7,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [8,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-##  [9,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-## [10,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
-</code></pre>
-
-<p>When we use <code>complete</code>, we get the same thing as just dropping the <code>NA</code> rows.</p>
-
-<pre><code class="r">cov(data, use = &#39;complete&#39;)
-</code></pre>
-
-<pre><code>##              [,1]       [,2]        [,3]        [,4]        [,5]        [,6]
-##  [1,]  1.12361858 -0.6585074 -0.43176457  0.69370787  0.11489624  0.61453819
-##  [2,] -0.65850740  0.9959507  0.21270732 -0.80342909 -0.27110863 -0.35220366
-##  [3,] -0.43176457  0.2127073  1.01583588 -0.07165297 -0.35068365 -0.25645484
-##  [4,]  0.69370787 -0.8034291 -0.07165297  1.04270786  0.19719938  0.24775409
-##  [5,]  0.11489624 -0.2711086 -0.35068365  0.19719938  0.57253390 -0.04561483
-##  [6,]  0.61453819 -0.3522037 -0.25645484  0.24775409 -0.04561483  1.13979200
-##  [7,] -0.09064129  0.1212457 -0.32995292 -0.38544663 -0.18446155  0.72359362
-##  [8,]  0.65766841 -0.2888639  0.18274364  0.48879303 -0.02105994  0.34411418
-##  [9,]  0.30959101 -0.3376672 -0.27720183  0.36645680 -0.17901332  0.45312449
-## [10,] -0.86329613  0.1165757  0.31168312  0.04913339  0.40888931 -1.03675392
+##  [1,] -2.62666773 -1.4722316 -0.3164024 -0.1323967
+##  [2,] -0.12335079  1.0972550  2.1741523  0.5336786
+##  [3,] -0.44908266 -1.0502304 -0.6344078  0.7937576
+##  [4,] -0.04179480 -0.5329891 -0.3001254  0.5143836
+##  [5,] -1.00694068 -0.2079030  0.1998212 -0.4027840
+##  [6,] -0.19144789 -0.6729825 -1.6493459  0.7047418
+##  [7,]  1.69847767  1.1487469  1.3176655 -0.8453007
+##  [8,]  0.09829714  0.1868569 -0.3452368 -1.7971696
+##  [9,] -0.35486162  0.3770601  0.4880484  0.5611533
+## [10,] -0.95844137  0.2238168  0.7127507 -0.2597389
+## [11,] -0.34446407 -1.2050152 -0.2222073 -0.3870832
+## [12,] -1.72659855  1.7059909 -0.3943868 -2.3102125</code></pre>
+<p>The covariance, with the implicit <code>use = &#39;everything&#39;</code> will give us a “cross” of <code>NA</code> in the covariance matrix.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">cov</span>(data)</a></code></pre></div>
+<pre><code>##              [,1]        [,2] [,3]        [,4]        [,5]        [,6]
+##  [1,]  1.00481929 -0.25953847   NA -0.26191673 -0.49433916 -0.33281927
+##  [2,] -0.25953847  1.03356272   NA  0.46433141  0.44723463  0.19329342
+##  [3,]          NA          NA   NA          NA          NA          NA
+##  [4,] -0.26191673  0.46433141   NA  1.05110996 -0.02342355  0.22988607
+##  [5,] -0.49433916  0.44723463   NA -0.02342355  0.91857807  0.06178755
+##  [6,] -0.33281927  0.19329342   NA  0.22988607  0.06178755  0.88860997
+##  [7,] -0.33972499 -0.33570333   NA -0.39318178 -0.07746939 -0.32934492
+##  [8,] -0.01822199 -0.05081532   NA -0.17677354 -0.07053865  0.02496831
+##  [9,] -0.25764497  0.15639461   NA  0.01073743  0.23005399 -0.13299972
+## [10,] -0.17436534 -0.17321098   NA -0.23505304 -0.03599258  0.06184745
 ##              [,7]        [,8]        [,9]       [,10]
-##  [1,] -0.09064129  0.65766841  0.30959101 -0.86329613
-##  [2,]  0.12124571 -0.28886389 -0.33766721  0.11657574
-##  [3,] -0.32995292  0.18274364 -0.27720183  0.31168312
-##  [4,] -0.38544663  0.48879303  0.36645680  0.04913339
-##  [5,] -0.18446155 -0.02105994 -0.17901332  0.40888931
-##  [6,]  0.72359362  0.34411418  0.45312449 -1.03675392
-##  [7,]  1.95391033 -0.17561476  0.81297857 -0.53589753
-##  [8,] -0.17561476  1.22798844 -0.08766992 -0.33810496
-##  [9,]  0.81297857 -0.08766992  1.07758226 -0.28999355
-## [10,] -0.53589753 -0.33810496 -0.28999355  1.75152292
-</code></pre>
-
-<pre><code class="r">all(cov(data, use = &#39;complete&#39;) == cov(data[complete.cases(data), ]))
-</code></pre>
-
-<pre><code>## [1] TRUE
-</code></pre>
-
+##  [1,] -0.33972499 -0.01822199 -0.25764497 -0.17436534
+##  [2,] -0.33570333 -0.05081532  0.15639461 -0.17321098
+##  [3,]          NA          NA          NA          NA
+##  [4,] -0.39318178 -0.17677354  0.01073743 -0.23505304
+##  [5,] -0.07746939 -0.07053865  0.23005399 -0.03599258
+##  [6,] -0.32934492  0.02496831 -0.13299972  0.06184745
+##  [7,]  1.10731732  0.31389085  0.32705747  0.11035842
+##  [8,]  0.31389085  1.01367751  0.56074750 -0.49520843
+##  [9,]  0.32705747  0.56074750  0.98163234  0.01398087
+## [10,]  0.11035842 -0.49520843  0.01398087  0.99145070</code></pre>
+<p>The jackknife covariance does the same thing.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">jackknife_cov</span>(data)</a></code></pre></div>
+<pre><code>##             [,1]       [,2] [,3]       [,4]       [,5]       [,6]       [,7]
+##  [1,] 10.1319278 -2.6170129   NA -2.6409937 -4.9845865 -3.3559276 -3.4255603
+##  [2,] -2.6170129 10.4217575   NA  4.6820084  4.5096159  1.9490419 -3.3850086
+##  [3,]         NA         NA   NA         NA         NA         NA         NA
+##  [4,] -2.6409937  4.6820084   NA 10.5986921 -0.2361874  2.3180179 -3.9645829
+##  [5,] -4.9845865  4.5096159   NA -0.2361874  9.2623288  0.6230244 -0.7811497
+##  [6,] -3.3559276  1.9490419   NA  2.3180179  0.6230244  8.9601505 -3.3208946
+##  [7,] -3.4255603 -3.3850086   NA -3.9645829 -0.7811497 -3.3208946 11.1654496
+##  [8,] -0.1837384 -0.5123878   NA -1.7824665 -0.7112647  0.2517638  3.1650661
+##  [9,] -2.5979201  1.5769790   NA  0.1082691  2.3197110 -1.3410805  3.2978295
+## [10,] -1.7581839 -1.7465440   NA -2.3701182 -0.3629252  0.6236285  1.1127807
+##             [,8]       [,9]      [,10]
+##  [1,] -0.1837384 -2.5979201 -1.7581839
+##  [2,] -0.5123878  1.5769790 -1.7465440
+##  [3,]         NA         NA         NA
+##  [4,] -1.7824665  0.1082691 -2.3701182
+##  [5,] -0.7112647  2.3197110 -0.3629252
+##  [6,]  0.2517638 -1.3410805  0.6236285
+##  [7,]  3.1650661  3.2978295  1.1127807
+##  [8,] 10.2212483  5.6542040 -4.9933517
+##  [9,]  5.6542040  9.8981261  0.1409737
+## [10,] -4.9933517  0.1409737  9.9971279</code></pre>
+</div>
+<div id="missing-row" class="section level1">
+<h1>Missing row</h1>
+<p>When we have some <code>NA</code> values in a row, we have a conceptual problem with the jackknife as the width of the jackknife distribution is linked to the number of measurements.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">data &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">120</span>), <span class="dt">ncol =</span> <span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2">data[<span class="dv">2</span>, ] &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="kw">print</span>(data)</a></code></pre></div>
+<pre><code>##             [,1]       [,2]       [,3]       [,4]        [,5]       [,6]
+##  [1,] -0.7157144  0.3830505 -0.7483596  0.7578021 -0.42463748 -1.0319888
+##  [2,]         NA         NA         NA         NA          NA         NA
+##  [3,]  1.5840008  2.3416447 -0.6236529  0.7555545 -0.88647717  0.9775473
+##  [4,] -0.5344119 -1.2091202  0.6460490  1.3712069 -1.24553237  0.3204870
+##  [5,] -0.1075479 -1.0631454  0.5848066  0.2025899  0.44373591  0.5551791
+##  [6,]  1.3168021 -0.2133760  0.6932702 -0.4290675  1.19539207  0.9631749
+##  [7,]  0.1555438  0.3464016 -0.1989959  2.1343560  0.44835542  0.9661736
+##  [8,]  0.5374163 -0.5724669 -1.7348646  1.1058122 -2.58813398  0.9200456
+##  [9,] -1.4434792  1.9038218 -0.5851163  0.2887971 -1.26253861  1.0112359
+## [10,]  0.5052784  0.4225661 -0.5862763  0.0177994 -2.16879414 -0.3203245
+## [11,] -0.5389071 -1.9780189 -0.6286661  1.1347285  0.05426532 -0.3279949
+## [12,] -0.5772848 -1.3236084  0.7361014  0.5699565 -0.54043595 -0.3360399
+##              [,7]        [,8]        [,9]       [,10]
+##  [1,] -0.98568735  0.83193395  0.05163127  1.26338239
+##  [2,]          NA          NA          NA          NA
+##  [3,] -0.43978461  0.07868216 -1.16101851 -1.09880530
+##  [4,]  1.95037020 -0.66837550  0.31933346 -0.61617362
+##  [5,]  0.02014322  0.27293429  0.58948715  1.26511164
+##  [6,] -0.69760198  0.68743862 -0.02808972 -0.76255415
+##  [7,] -0.15452058  0.14798859 -0.57284665  0.48192309
+##  [8,]  0.20937894 -0.33652017  0.36277158 -0.21724651
+##  [9,]  0.75228259 -0.55324366 -1.36605017  0.23668048
+## [10,]  0.97152448 -0.55950405  0.02085035  0.90439651
+## [11,]  0.33203712 -2.59494362  0.45120574 -0.95755261
+## [12,]  0.96568011  0.88597241  0.51337796  0.06969566</code></pre>
+<p>Also here we get the same behavior by default:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">cov</span>(data)</a></code></pre></div>
+<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+##  [1,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [2,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [3,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [4,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [5,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [6,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [7,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [8,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [9,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+## [10,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">jackknife_cov</span>(data)</a></code></pre></div>
+<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+##  [1,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [2,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [3,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [4,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [5,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [6,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [7,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [8,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##  [9,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA
+## [10,]   NA   NA   NA   NA   NA   NA   NA   NA   NA    NA</code></pre>
+<p>When we use <code>complete</code>, we get the same thing as just dropping the <code>NA</code> rows.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">cov</span>(data, <span class="dt">use =</span> <span class="st">&#39;complete&#39;</span>)</a></code></pre></div>
+<pre><code>##              [,1]        [,2]         [,3]         [,4]        [,5]
+##  [1,]  0.83250622  0.29721215 -0.040818273 -0.121794571  0.08951248
+##  [2,]  0.29721215  1.80989413 -0.368006348 -0.136563215 -0.31446225
+##  [3,] -0.04081827 -0.36800635  0.631771866 -0.138924601  0.55825904
+##  [4,] -0.12179457 -0.13656322 -0.138924601  0.503761136 -0.06619509
+##  [5,]  0.08951248 -0.31446225  0.558259040 -0.066195088  1.32129893
+##  [6,]  0.26572290  0.37253587 -0.004927037  0.023871159  0.05484673
+##  [7,] -0.32454495 -0.36480161  0.161003109  0.085960166 -0.47637573
+##  [8,]  0.20371515  0.36304579  0.262045321 -0.183206838  0.24357836
+##  [9,] -0.05847824 -0.83474393  0.140077916 -0.009062944  0.05487916
+## [10,] -0.29156935  0.04493083 -0.005503744 -0.071729203 -0.03559882
+##               [,6]        [,7]        [,8]         [,9]        [,10]
+##  [1,]  0.265722902 -0.32454495  0.20371515 -0.058478236 -0.291569350
+##  [2,]  0.372535872 -0.36480161  0.36304579 -0.834743927  0.044930829
+##  [3,] -0.004927037  0.16100311  0.26204532  0.140077916 -0.005503744
+##  [4,]  0.023871159  0.08596017 -0.18320684 -0.009062944 -0.071729203
+##  [5,]  0.054846728 -0.47637573  0.24357836  0.054879159 -0.035598821
+##  [6,]  0.524206505 -0.03716920  0.04319642 -0.243855291 -0.229269321
+##  [7,] -0.037169205  0.72991222 -0.32109435  0.113442823 -0.087148907
+##  [8,]  0.043196423 -0.32109435  0.96679949 -0.043367164  0.334500851
+##  [9,] -0.243855291  0.11344282 -0.04336716  0.453328559  0.089814514
+## [10,] -0.229269321 -0.08714891  0.33450085  0.089814514  0.741091738</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">all</span>(<span class="kw">cov</span>(data, <span class="dt">use =</span> <span class="st">&#39;complete&#39;</span>) <span class="op">==</span><span class="st"> </span><span class="kw">cov</span>(data[<span class="kw">complete.cases</span>(data), ]))</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
 <p>With our jackknife function we get a failure, which should not happen!</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">jackknife_cov</span>(data, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>##             [,1]       [,2]        [,3]       [,4]       [,5]        [,6]
+##  [1,] 100.733253   35.96267  -4.9390111 -14.737143  10.831010  32.1524711
+##  [2,]  35.962670  218.99719 -44.5287681 -16.524149 -38.049932  45.0768405
+##  [3,]  -4.939011  -44.52877  76.4443958 -16.809877  67.549344  -0.5961715
+##  [4,] -14.737143  -16.52415 -16.8098768  60.955097  -8.009606   2.8884102
+##  [5,]  10.831010  -38.04993  67.5493438  -8.009606 159.877171   6.6364541
+##  [6,]  32.152471   45.07684  -0.5961715   2.888410   6.636454  63.4289871
+##  [7,] -39.269939  -44.14099  19.4813762  10.401180 -57.641463  -4.4974738
+##  [8,]  24.649533   43.92854  31.7074839 -22.168027  29.472981   5.2267672
+##  [9,]  -7.075867 -101.00402  16.9494278  -1.096616   6.640378 -29.5064902
+## [10,] -35.279891    5.43663  -0.6659531  -8.679234  -4.307457 -27.7415878
+##             [,7]       [,8]        [,9]       [,10]
+##  [1,] -39.269939  24.649533   -7.075867 -35.2798913
+##  [2,] -44.140994  43.928541 -101.004015   5.4366303
+##  [3,]  19.481376  31.707484   16.949428  -0.6659531
+##  [4,]  10.401180 -22.168027   -1.096616  -8.6792335
+##  [5,] -57.641463  29.472981    6.640378  -4.3074573
+##  [6,]  -4.497474   5.226767  -29.506490 -27.7415878
+##  [7,]  88.319379 -38.852416   13.726582 -10.5450178
+##  [8,] -38.852416 116.982738   -5.247427  40.4746029
+##  [9,]  13.726582  -5.247427   54.852756  10.8675561
+## [10,] -10.545018  40.474603   10.867556  89.6721003</code></pre>
+</div>
 
-<pre><code class="r">jackknife_cov(data, na.rm = TRUE)
-</code></pre>
 
-<pre><code>##             [,1]      [,2]       [,3]       [,4]       [,5]        [,6]
-##  [1,]  135.95785 -79.67939 -52.243513  83.938652  13.902446   74.359121
-##  [2,]  -79.67939 120.51003  25.737586 -97.214919 -32.804144  -42.616642
-##  [3,]  -52.24351  25.73759 122.916142  -8.670009 -42.432722  -31.031036
-##  [4,]   83.93865 -97.21492  -8.670009 126.167650  23.861125   29.978245
-##  [5,]   13.90245 -32.80414 -42.432722  23.861125  69.276601   -5.519394
-##  [6,]   74.35912 -42.61664 -31.031036  29.978245  -5.519394  137.914832
-##  [7,]  -10.96760  14.67073 -39.924304 -46.639043 -22.319847   87.554828
-##  [8,]   79.57788 -34.95253  22.111981  59.143957  -2.548253   41.637816
-##  [9,]   37.46051 -40.85773 -33.541421  44.341273 -21.660612   54.828063
-## [10,] -104.45883  14.10566  37.713658   5.945140  49.475606 -125.447224
-##            [,7]       [,8]      [,9]      [,10]
-##  [1,] -10.96760  79.577878  37.46051 -104.45883
-##  [2,]  14.67073 -34.952530 -40.85773   14.10566
-##  [3,] -39.92430  22.111981 -33.54142   37.71366
-##  [4,] -46.63904  59.143957  44.34127    5.94514
-##  [5,] -22.31985  -2.548253 -21.66061   49.47561
-##  [6,]  87.55483  41.637816  54.82806 -125.44722
-##  [7,] 236.42315 -21.249386  98.37041  -64.84360
-##  [8,] -21.24939 148.586601 -10.60806  -40.91070
-##  [9,]  98.37041 -10.608060 130.38745  -35.08922
-## [10,] -64.84360 -40.910701 -35.08922  211.93427
-</code></pre>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 </body>
-
 </html>

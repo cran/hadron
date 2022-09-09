@@ -4,7 +4,8 @@
 \alias{pointswithslantederror}
 \title{pointswithslantederror}
 \usage{
-pointswithslantederror(x, y, dx, dy, cor, col = "black", bcol = "black", ...)
+pointswithslantederror(x, y, dx, dy, cor, col = "black", bcol = "black",
+  ...)
 }
 \arguments{
 \item{x}{numeric vector. x-values}

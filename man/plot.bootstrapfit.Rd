@@ -6,7 +6,8 @@
 \usage{
 \method{plot}{bootstrapfit}(x, ..., col.line = "black", col.band = "gray",
   opacity.band = 0.65, lty = c(1), lwd = c(1), supports = 1000,
-  plot.range, error = x$error.function, ribbon.on.top = TRUE)
+  plot.range, error = x$error.function, ribbon.on.top = TRUE,
+  rep = FALSE)
 }
 \arguments{
 \item{x}{object returned by \code{bootstrap.nlsfit}}
@@ -36,6 +37,9 @@ need to be changed.}
 \item{ribbon.on.top}{Logical, controls whether the ribbon should be in
 front of the data points. This is recommended when there are very many data
 points and a highly constrained model.}
+
+\item{rep}{If set to \code{TRUE}, operate like "replot" in gnuplot. Allows
+plotting the fit result on top of existing plot.}
 }
 \value{
 No return value.

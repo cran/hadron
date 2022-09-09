@@ -24,7 +24,7 @@ fit function accepts \code{...} as the last parameter to be forward compatible.}
 \item{y}{the data as a one-dimensional numerical vector to be described by
 the fit function.}
 
-\item{dy}{Numeric vector. Errors of the dependent and independent
+\item{dy, dx}{Numeric vector. Errors of the dependent and independent
 variable, respectively. These do not need to be specified as they can be
 computed from the bootstrap samples. In the case of parametric bootstrap it
 might would lead to a loss of information if they were computed from the
@@ -33,13 +33,6 @@ is given.}
 
 \item{x}{values of the explaining variable in form of a one-dimensional
 numerical vector.}
-
-\item{dx}{Numeric vector. Errors of the dependent and independent
-variable, respectively. These do not need to be specified as they can be
-computed from the bootstrap samples. In the case of parametric bootstrap it
-might would lead to a loss of information if they were computed from the
-pseudo-bootstrap samples. They must not be specified if a covariance matrix
-is given.}
 
 \item{lower}{Numeric vector of length \code{length(par.guess)}
 of lower bounds on the fit parameters. If missing, \code{-Inf}

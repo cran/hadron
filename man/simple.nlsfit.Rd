@@ -28,7 +28,7 @@ the fit function.}
 \item{x}{values of the explaining variable in form of a one-dimensional
 numerical vector.}
 
-\item{errormodel}{Either "yerror" or "xyerror", depending on the x-values having
+\item{errormodel}{Either "yerrors" or "xyerrors", depending on the x-values having
 errors or not.}
 
 \item{priors}{List possessing the elements \code{param}, \code{p} and \code{psamples}.
@@ -49,14 +49,7 @@ will be set for all.}
 of upper bounds on the fit parameters. If missing, \code{+Inf}
 will be set for all.}
 
-\item{dy}{Numeric vector. Errors of the dependent and independent
-variable, respectively. These do not need to be specified as they can be
-computed from the bootstrap samples. In the case of parametric bootstrap it
-might would lead to a loss of information if they were computed from the
-pseudo-bootstrap samples. They must not be specified if a covariance matrix
-is given.}
-
-\item{dx}{Numeric vector. Errors of the dependent and independent
+\item{dy, dx}{Numeric vector. Errors of the dependent and independent
 variable, respectively. These do not need to be specified as they can be
 computed from the bootstrap samples. In the case of parametric bootstrap it
 might would lead to a loss of information if they were computed from the

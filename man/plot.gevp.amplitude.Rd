@@ -4,7 +4,8 @@
 \alias{plot.gevp.amplitude}
 \title{plot.gevp.amplitude}
 \usage{
-\method{plot}{gevp.amplitude}(x, xlab = "t", ylab = paste0("P[,", x$id, ",", x$op.id, "]"), ...)
+\method{plot}{gevp.amplitude}(x, xlab = "t", ylab = paste0("P[,", x$id,
+  ",", x$op.id, "]"), ...)
 }
 \arguments{
 \item{x}{Object of type \code{gevp.amplitude}.}

@@ -4,7 +4,8 @@
 \alias{plot.uwerr}
 \title{Plot Command For Class UWerr}
 \usage{
-\method{plot}{uwerr}(x, ..., main = "x", plot.hist = TRUE, index = 1, Lambda = 100)
+\method{plot}{uwerr}(x, ..., main = "x", plot.hist = TRUE, index = 1,
+  Lambda = 100)
 }
 \arguments{
 \item{x}{object of class \code{uwerr}}

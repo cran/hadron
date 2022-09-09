@@ -4,7 +4,8 @@
 \alias{cf_meta}
 \title{CF metadata mixin constructor}
 \usage{
-cf_meta(.cf = cf(), nrObs = 1, Time = NA, nrStypes = 1, symmetrised = FALSE)
+cf_meta(.cf = cf(), nrObs = 1, Time = NA, nrStypes = 1,
+  symmetrised = FALSE)
 }
 \arguments{
 \item{.cf}{\code{cf} object to extend.}

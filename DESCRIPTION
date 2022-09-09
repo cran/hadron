@@ -1,6 +1,6 @@
 Package: hadron
-Version: 3.1.2
-Date: 2020-09-09
+Version: 3.2.0
+Date: 2022-09-09
 Title: Analysis Framework for Monte Carlo Simulation Data in Physics
 Authors@R: 
     c(person(given = "Bartosz",
@@ -53,7 +53,7 @@ Description: Toolkit to perform statistical analyses of correlation
    and M. Fischer et al. (2020)
    <https://inspirehep.net/literature/1792113>) are implemented.
    In addition, input/output and plotting routines are available.
-Imports: abind, boot, dplyr, Rcpp, R6, stringr
+Imports: abind, boot, dplyr, R6, Rcpp, stringr
 LinkingTo: Rcpp
 Suggests: minpack.lm, parallel, rhdf5, knitr, testthat, tictoc,
         tikzDevice, hash, numDeriv, staplr, markdown, rmarkdown, errors
@@ -61,11 +61,11 @@ License: GPL-3
 URL: https://github.com/HISKP-LQCD/hadron
 BugReports: https://github.com/HISKP-LQCD/hadron/issues
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Encoding: UTF-8
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2020-09-09 11:45:05 UTC; urbach
+Packaged: 2022-09-09 15:32:36 UTC; urbach
 Author: Bartosz Kostrzewa [aut],
   Johann Ostmeyer [aut],
   Martin Ueding [aut],
@@ -77,4 +77,4 @@ Author: Bartosz Kostrzewa [aut],
   Vittorio Lubicz [ctb]
 Maintainer: Carsten Urbach <urbach@hiskp.uni-bonn.de>
 Repository: CRAN
-Date/Publication: 2020-09-10 06:40:02 UTC
+Date/Publication: 2022-09-09 16:12:59 UTC
